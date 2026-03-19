@@ -28,8 +28,8 @@ export function AppSidebar({ active, onNavigate }: AppSidebarProps) {
     >
       <div className="flex items-center gap-2 px-4 h-14 border-b border-border">
         {!collapsed && (
-          <span className="font-heading text-lg font-bold text-primary truncate">
-            BuildSmart AI
+          <span className="font-heading text-lg font-bold text-foreground truncate">
+            Build<span className="text-primary">Smart</span> AI
           </span>
         )}
         <button
