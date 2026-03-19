@@ -189,6 +189,7 @@ const Index = () => {
         return (
           <InputProject
             initialValue={project}
+            onBackToProjects={() => setShowProjectList(true)}
             onSubmit={(details) => {
               setProject(details);
               moveForward("cost");

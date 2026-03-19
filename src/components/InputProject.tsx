@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { ArrowRight, CalendarIcon } from "lucide-react";
+import { ArrowLeft, ArrowRight, CalendarIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -16,9 +16,10 @@ import { toast } from "@/components/ui/sonner";
 interface InputProjectProps {
   initialValue: ProjectDetails;
   onSubmit: (details: ProjectDetails) => void;
+  onBackToProjects?: () => void;
 }
 
-export function InputProject({ initialValue, onSubmit }: InputProjectProps) {
+export function InputProject({ initialValue, onSubmit, onBackToProjects }: InputProjectProps) {
   const [name, setName] = useState(initialValue.name);
   const [type, setType] = useState<ProjectDetails["type"]>(initialValue.type);
   const [location, setLocation] = useState(initialValue.location);
@@ -65,6 +66,11 @@ export function InputProject({ initialValue, onSubmit }: InputProjectProps) {
       transition={{ duration: 0.35 }}
       className="max-w-2xl mx-auto"
     >
+      {onBackToProjects && (
+        <Button variant="ghost" className="mb-3 -ml-2" onClick={onBackToProjects}>
+          <ArrowLeft size={16} className="mr-1" /> Back to Projects
+        </Button>
+      )}
       <h1 className="text-2xl font-heading font-bold mb-1">Input Project Details</h1>
       <p className="text-muted-foreground text-sm mb-8">
         Enter your construction project parameters for AI-powered estimation.
