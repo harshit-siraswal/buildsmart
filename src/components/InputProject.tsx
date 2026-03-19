@@ -10,17 +10,53 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Calendar } from "@/components/ui/calendar";
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
+import { type ProjectDetails } from "@/lib/project-model";
+import { toast } from "@/components/ui/sonner";
 
 interface InputProjectProps {
-  onSubmit: () => void;
+  initialValue: ProjectDetails;
+  onSubmit: (details: ProjectDetails) => void;
 }
 
-export function InputProject({ onSubmit }: InputProjectProps) {
-  const [budget, setBudget] = useState([2500000]);
-  const [date, setDate] = useState<Date>(new Date(2025, 3, 1));
+export function InputProject({ initialValue, onSubmit }: InputProjectProps) {
+  const [name, setName] = useState(initialValue.name);
+  const [type, setType] = useState<ProjectDetails["type"]>(initialValue.type);
+  const [location, setLocation] = useState(initialValue.location);
+  const [areaSqFt, setAreaSqFt] = useState(initialValue.areaSqFt);
+  const [material, setMaterial] = useState<ProjectDetails["material"]>(initialValue.material);
+  const [budget, setBudget] = useState([initialValue.budget]);
+  const [date, setDate] = useState<Date>(initialValue.startDate);
 
   const formatBudget = (v: number) =>
     v >= 1000000 ? `$${(v / 1000000).toFixed(1)}M` : `$${(v / 1000).toFixed(0)}K`;
+
+  const estimatedDurationMonths = Math.max(4, Math.round(areaSqFt / 1800) + 2);
+
+  const handleSubmit = () => {
+    if (!name.trim() || !location.trim()) {
+      toast.error("Missing details", {
+        description: "Project name and location are required.",
+      });
+      return;
+    }
+
+    if (areaSqFt < 1000) {
+      toast.error("Area is too small", {
+        description: "Use a project area of at least 1,000 sq ft.",
+      });
+      return;
+    }
+
+    onSubmit({
+      name: name.trim(),
+      type,
+      location: location.trim(),
+      areaSqFt,
+      material,
+      budget: budget[0],
+      startDate: date,
+    });
+  };
 
   return (
     <motion.div
@@ -36,12 +72,12 @@ export function InputProject({ onSubmit }: InputProjectProps) {
 
       <div className="space-y-5">
         <Field label="Project Name">
-          <Input defaultValue="Greenfield Residential Complex" className="bg-secondary border-border" />
+          <Input value={name} onChange={(e) => setName(e.target.value)} className="bg-secondary border-border" />
         </Field>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
           <Field label="Project Type">
-            <Select defaultValue="residential">
+            <Select value={type} onValueChange={(v) => setType(v as ProjectDetails["type"])}>
               <SelectTrigger className="bg-secondary border-border">
                 <SelectValue />
               </SelectTrigger>
@@ -55,17 +91,22 @@ export function InputProject({ onSubmit }: InputProjectProps) {
           </Field>
 
           <Field label="Location">
-            <Input defaultValue="Mumbai, India" className="bg-secondary border-border" />
+            <Input value={location} onChange={(e) => setLocation(e.target.value)} className="bg-secondary border-border" />
           </Field>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
           <Field label="Total Area (sq ft)">
-            <Input type="number" defaultValue={12000} className="bg-secondary border-border" />
+            <Input
+              type="number"
+              value={areaSqFt}
+              onChange={(e) => setAreaSqFt(Math.max(0, Number(e.target.value) || 0))}
+              className="bg-secondary border-border"
+            />
           </Field>
 
           <Field label="Primary Material">
-            <Select defaultValue="concrete">
+            <Select value={material} onValueChange={(v) => setMaterial(v as ProjectDetails["material"])}>
               <SelectTrigger className="bg-secondary border-border">
                 <SelectValue />
               </SelectTrigger>
@@ -115,13 +156,21 @@ export function InputProject({ onSubmit }: InputProjectProps) {
         </Field>
 
         <Button
-          onClick={onSubmit}
+          onClick={handleSubmit}
           size="lg"
           className="w-full mt-4 text-base font-semibold"
         >
           Generate AI Estimate
           <ArrowRight className="ml-2" size={18} />
         </Button>
+
+        <div className="rounded-lg border border-border bg-card px-4 py-3 text-sm">
+          <p className="font-medium">Quick feasibility snapshot</p>
+          <p className="text-muted-foreground mt-1">
+            Estimated duration: {estimatedDurationMonths} months · Budget density: ₹
+            {Math.round(budget[0] / Math.max(areaSqFt, 1)).toLocaleString("en-IN")} / sq ft
+          </p>
+        </div>
       </div>
     </motion.div>
   );

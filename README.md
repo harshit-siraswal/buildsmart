@@ -1,3 +1,3 @@
-# Welcome to your Lovable project
+# BuildSmart AI
 
 TODO: Document your project here

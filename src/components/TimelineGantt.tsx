@@ -1,31 +1,81 @@
 import { motion } from "framer-motion";
 import { Download, Diamond } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useMemo, useState } from "react";
+import { format } from "date-fns";
+import { formatCurrencyINR, type ProjectDetails, type TimelinePhase } from "@/lib/project-model";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
+import { toast } from "@/components/ui/sonner";
 
-const phases = [
-  { name: "Site Preparation", start: 0, duration: 3, critical: false, milestone: false },
-  { name: "Foundation", start: 2, duration: 5, critical: true, milestone: true },
-  { name: "Structure", start: 6, duration: 8, critical: true, milestone: false },
-  { name: "MEP Works", start: 10, duration: 6, critical: true, milestone: false },
-  { name: "Interior", start: 14, duration: 5, critical: false, milestone: true },
-  { name: "Finishing", start: 18, duration: 4, critical: false, milestone: false },
-  { name: "Handover", start: 21, duration: 2, critical: true, milestone: true },
-];
+interface TimelineGanttProps {
+  project: ProjectDetails;
+  phases: TimelinePhase[];
+  totalWeeks: number;
+}
 
-const totalWeeks = 24;
-const months = ["Apr", "May", "Jun", "Jul", "Aug", "Sep"];
+export function TimelineGantt({ project, phases, totalWeeks }: TimelineGanttProps) {
+  const [criticalOnly, setCriticalOnly] = useState(false);
+  const visiblePhases = useMemo(
+    () => (criticalOnly ? phases.filter((phase) => phase.critical) : phases),
+    [criticalOnly, phases],
+  );
 
-export function TimelineGantt() {
+  const startDate = project.startDate;
+  const projectEnd = new Date(startDate.getTime() + totalWeeks * 7 * 24 * 60 * 60 * 1000);
+
+  const months = useMemo(() => {
+    const labels: string[] = [];
+    const cursor = new Date(startDate);
+    while (cursor <= projectEnd) {
+      labels.push(format(cursor, "MMM yyyy"));
+      cursor.setMonth(cursor.getMonth() + 1);
+    }
+    return labels;
+  }, [startDate, projectEnd]);
+
+  const exportTimeline = () => {
+    const lines = [
+      ["Phase", "Start Week", "Duration (weeks)", "Critical", "Milestone"].join(","),
+      ...phases.map((phase) =>
+        [phase.name, phase.startWeek + 1, phase.durationWeeks, phase.critical ? "Yes" : "No", phase.milestone ? "Yes" : "No"].join(","),
+      ),
+    ];
+    const blob = new Blob([lines.join("\n")], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `${project.name.toLowerCase().replace(/\s+/g, "-")}-timeline.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+    toast.success("Timeline exported");
+  };
+
   return (
     <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.35 }}>
       <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
         <div>
           <h1 className="text-2xl font-heading font-bold">Project Timeline</h1>
-          <p className="text-sm text-muted-foreground mt-1">April 2025 — September 2025 · 24 weeks</p>
+          <p className="text-sm text-muted-foreground mt-1">
+            {format(startDate, "MMMM yyyy")} - {format(projectEnd, "MMMM yyyy")} - {totalWeeks} weeks
+          </p>
         </div>
-        <Button variant="outline" className="gap-2">
+        <Button variant="outline" className="gap-2" onClick={exportTimeline}>
           <Download size={16} /> Export Timeline
         </Button>
+      </div>
+
+      <div className="rounded-lg border border-border bg-card px-4 py-3 mb-4 flex items-center justify-between">
+        <div>
+          <p className="text-sm font-medium">Critical path filter</p>
+          <p className="text-xs text-muted-foreground">
+            {criticalOnly ? "Showing only critical phases" : "Showing full plan"}
+          </p>
+        </div>
+        <div className="flex items-center gap-2">
+          <Label htmlFor="critical-only" className="text-xs text-muted-foreground">Critical only</Label>
+          <Switch id="critical-only" checked={criticalOnly} onCheckedChange={setCriticalOnly} />
+        </div>
       </div>
 
       {/* Month header */}
@@ -44,9 +94,9 @@ export function TimelineGantt() {
           </div>
 
           {/* Rows */}
-          {phases.map((phase, i) => {
-            const leftPct = (phase.start / totalWeeks) * 100;
-            const widthPct = (phase.duration / totalWeeks) * 100;
+          {visiblePhases.map((phase, i) => {
+            const leftPct = (phase.startWeek / totalWeeks) * 100;
+            const widthPct = (phase.durationWeeks / totalWeeks) * 100;
 
             return (
               <div key={i} className="flex items-center border-b border-border/30 hover:bg-secondary/30 transition">
@@ -78,7 +128,7 @@ export function TimelineGantt() {
       </div>
 
       {/* Legend */}
-      <div className="flex flex-wrap gap-6 mt-4 text-xs text-muted-foreground">
+      <div className="flex flex-wrap gap-6 mt-4 text-xs text-muted-foreground items-center">
         <span className="flex items-center gap-2">
           <span className="w-4 h-2 rounded bg-primary/70 inline-block" /> Normal
         </span>
@@ -87,6 +137,9 @@ export function TimelineGantt() {
         </span>
         <span className="flex items-center gap-2">
           <Diamond size={10} className="text-primary fill-primary" /> Milestone
+        </span>
+        <span>
+          Budget guardrail: {formatCurrencyINR(project.budget)}
         </span>
       </div>
     </motion.div>

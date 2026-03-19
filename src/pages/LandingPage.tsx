@@ -2,6 +2,8 @@ import { motion } from "framer-motion";
 import { ArrowRight, BarChart3, Brain, Clock, DollarSign, Layers, Shield, Users, Zap } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
+import { ThemeToggle } from "@/components/ThemeToggle";
+import { BrandLogo } from "@/components/BrandLogo";
 
 const features = [
   { icon: Brain, title: "AI-Powered Estimates", desc: "Get instant, accurate cost breakdowns powered by machine learning trained on thousands of projects." },
@@ -27,19 +29,18 @@ export default function LandingPage() {
       {/* Nav */}
       <nav className="fixed top-0 left-0 right-0 z-50 border-b border-border/50 bg-background/80 backdrop-blur-xl">
         <div className="max-w-7xl mx-auto flex items-center justify-between h-16 px-6">
-          <span className="font-heading text-xl font-bold text-foreground">
-            Build<span className="text-primary">Smart</span> AI
-          </span>
+          <BrandLogo textClassName="font-heading text-xl font-bold text-foreground" />
           <div className="hidden md:flex items-center gap-8 text-sm text-muted-foreground">
             <a href="#features" className="hover:text-foreground transition">Features</a>
             <a href="#stats" className="hover:text-foreground transition">Results</a>
             <a href="#cta" className="hover:text-foreground transition">Pricing</a>
           </div>
           <div className="flex items-center gap-3">
-            <Button variant="ghost" size="sm" className="text-muted-foreground" onClick={() => navigate("/dashboard")}>
+            <ThemeToggle />
+            <Button variant="ghost" size="sm" className="text-muted-foreground" onClick={() => navigate("/auth")}>
               Sign in
             </Button>
-            <Button size="sm" onClick={() => navigate("/dashboard")} className="gap-1.5">
+            <Button size="sm" onClick={() => navigate("/auth")} className="gap-1.5">
               Start free trial <ArrowRight size={14} />
             </Button>
           </div>
@@ -196,9 +197,7 @@ export default function LandingPage() {
       {/* Footer */}
       <footer className="border-t border-border/50 py-8 px-6">
         <div className="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4 text-sm text-muted-foreground">
-          <span className="font-heading font-semibold text-foreground">
-            Build<span className="text-primary">Smart</span> AI
-          </span>
+          <BrandLogo textClassName="font-heading font-semibold text-foreground" />
           <span>© 2025 BuildSmart AI. All rights reserved.</span>
         </div>
       </footer>

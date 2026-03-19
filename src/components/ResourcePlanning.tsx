@@ -1,41 +1,61 @@
 import { motion } from "framer-motion";
 import { ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
-
-const labor = [
-  { role: "Site Engineer", count: 2, dailyRate: 3500, days: 180, total: 1260000 },
-  { role: "Project Manager", count: 1, dailyRate: 5000, days: 180, total: 900000 },
-  { role: "Skilled Workers", count: 12, dailyRate: 800, days: 150, total: 1440000 },
-  { role: "Helpers", count: 20, dailyRate: 500, days: 150, total: 1500000 },
-];
-
-const materials = [
-  { item: "Cement (bags)", qty: "4,200", delivery: "Apr 15, 2025" },
-  { item: "Steel Rods (tons)", qty: "28", delivery: "Apr 20, 2025" },
-  { item: "Sand (cu m)", qty: "320", delivery: "Apr 10, 2025" },
-  { item: "Bricks", qty: "85,000", delivery: "May 1, 2025" },
-  { item: "Wiring (m)", qty: "6,500", delivery: "Jun 15, 2025" },
-];
-
-const equipment = [
-  { name: "Tower Crane", rentalDays: 90, dailyCost: 8000, total: 720000 },
-  { name: "Concrete Mixer", rentalDays: 120, dailyCost: 2500, total: 300000 },
-  { name: "Excavator", rentalDays: 30, dailyCost: 6000, total: 180000 },
-];
-
-const fmt = (n: number) => "₹" + n.toLocaleString("en-IN");
-
-const totalResource =
-  labor.reduce((s, r) => s + r.total, 0) + equipment.reduce((s, r) => s + r.total, 0);
+import { Slider } from "@/components/ui/slider";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
+import { format } from "date-fns";
+import { formatCurrencyINR, type ProjectDetails, type ResourcePlan } from "@/lib/project-model";
 
 interface ResourcePlanningProps {
+  project: ProjectDetails;
+  plan: ResourcePlan;
+  crewMultiplier: number;
+  accelerated: boolean;
+  onChangeCrewMultiplier: (value: number) => void;
+  onChangeAccelerated: (value: boolean) => void;
   onNext: () => void;
 }
 
-export function ResourcePlanning({ onNext }: ResourcePlanningProps) {
+export function ResourcePlanning({
+  project,
+  plan,
+  crewMultiplier,
+  accelerated,
+  onChangeCrewMultiplier,
+  onChangeAccelerated,
+  onNext,
+}: ResourcePlanningProps) {
   return (
     <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.35 }}>
       <h1 className="text-2xl font-heading font-bold mb-6">Resource Planning</h1>
+
+      <div className="rounded-lg border border-border bg-card p-4 mb-6 space-y-4">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 items-center">
+          <div>
+            <p className="text-sm font-medium">Crew Strength Multiplier: {crewMultiplier.toFixed(1)}x</p>
+            <Slider
+              className="mt-2"
+              value={[crewMultiplier]}
+              onValueChange={(v) => onChangeCrewMultiplier(v[0])}
+              min={0.8}
+              max={1.6}
+              step={0.1}
+            />
+          </div>
+          <div className="flex items-center justify-between rounded-md border border-border px-3 py-2">
+            <div>
+              <Label htmlFor="accelerated-mode" className="text-sm font-medium">Accelerated Schedule</Label>
+              <p className="text-xs text-muted-foreground">Compresses duration by adding more shifts.</p>
+            </div>
+            <Switch
+              id="accelerated-mode"
+              checked={accelerated}
+              onCheckedChange={onChangeAccelerated}
+            />
+          </div>
+        </div>
+      </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
         {/* Labor */}
@@ -49,14 +69,14 @@ export function ResourcePlanning({ onNext }: ResourcePlanningProps) {
               </tr>
             </thead>
             <tbody>
-              {labor.map((r, i) => (
+              {plan.labor.map((r, i) => (
                 <tr key={i} className="border-b border-border/30">
                   <td className="py-2">
                     {r.role}
                     {r.count > 1 && <span className="text-muted-foreground"> ×{r.count}</span>}
                   </td>
-                  <td className="py-2 text-right text-muted-foreground">{fmt(r.dailyRate)}</td>
-                  <td className="py-2 text-right font-medium">{fmt(r.total)}</td>
+                  <td className="py-2 text-right text-muted-foreground">{formatCurrencyINR(r.dailyRate)}</td>
+                  <td className="py-2 text-right font-medium">{formatCurrencyINR(r.total)}</td>
                 </tr>
               ))}
             </tbody>
@@ -74,11 +94,11 @@ export function ResourcePlanning({ onNext }: ResourcePlanningProps) {
               </tr>
             </thead>
             <tbody>
-              {materials.map((r, i) => (
+              {plan.materials.map((r, i) => (
                 <tr key={i} className="border-b border-border/30">
                   <td className="py-2">{r.item}</td>
                   <td className="py-2 text-right">{r.qty}</td>
-                  <td className="py-2 text-right text-muted-foreground text-xs">{r.delivery}</td>
+                  <td className="py-2 text-right text-muted-foreground text-xs">{format(r.delivery, "dd MMM yyyy")}</td>
                 </tr>
               ))}
             </tbody>
@@ -96,11 +116,11 @@ export function ResourcePlanning({ onNext }: ResourcePlanningProps) {
               </tr>
             </thead>
             <tbody>
-              {equipment.map((r, i) => (
+              {plan.equipment.map((r, i) => (
                 <tr key={i} className="border-b border-border/30">
                   <td className="py-2">{r.name}</td>
                   <td className="py-2 text-right">{r.rentalDays}</td>
-                  <td className="py-2 text-right font-medium">{fmt(r.total)}</td>
+                  <td className="py-2 text-right font-medium">{formatCurrencyINR(r.total)}</td>
                 </tr>
               ))}
             </tbody>
@@ -111,8 +131,8 @@ export function ResourcePlanning({ onNext }: ResourcePlanningProps) {
       {/* Summary */}
       <div className="rounded-lg border border-border bg-card p-5 flex flex-wrap items-center justify-between gap-4 mb-6">
         <div>
-          <p className="text-sm text-muted-foreground">Total Resource Cost</p>
-          <p className="text-2xl font-heading font-bold text-primary">{fmt(totalResource)}</p>
+          <p className="text-sm text-muted-foreground">Total Resource Cost for {project.name}</p>
+          <p className="text-2xl font-heading font-bold text-primary">{formatCurrencyINR(plan.totalCost)}</p>
         </div>
         <Button onClick={onNext} className="gap-2">
           View Timeline <ArrowRight size={16} />

@@ -6,6 +6,64 @@
 
 @layer base {
   :root {
+    --background: 210 40% 98%;
+    --foreground: 224 24% 12%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 224 24% 12%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 224 24% 12%;
+
+    --primary: 216 89% 52%;
+    --primary-foreground: 210 40% 98%;
+
+    --secondary: 210 32% 94%;
+    --secondary-foreground: 224 24% 12%;
+
+    --muted: 210 22% 92%;
+    --muted-foreground: 218 13% 42%;
+
+    --accent: 31 95% 52%;
+    --accent-foreground: 210 40% 98%;
+
+    --destructive: 0 74% 52%;
+    --destructive-foreground: 210 40% 98%;
+
+    --border: 214 25% 86%;
+    --input: 214 25% 86%;
+    --ring: 216 89% 52%;
+
+    --radius: 0.75rem;
+
+    --sidebar-background: 210 38% 96%;
+    --sidebar-foreground: 218 13% 40%;
+    --sidebar-primary: 216 89% 52%;
+    --sidebar-primary-foreground: 210 40% 98%;
+    --sidebar-accent: 210 30% 90%;
+    --sidebar-accent-foreground: 224 24% 12%;
+    --sidebar-border: 214 25% 86%;
+    --sidebar-ring: 216 89% 52%;
+
+    --success: 152 63% 39%;
+    --success-foreground: 0 0% 100%;
+
+    --chart-1: 217 91% 60%;
+    --chart-2: 38 92% 50%;
+    --chart-3: 152 60% 45%;
+    --chart-4: 280 60% 55%;
+    --chart-5: 0 72% 51%;
+    --chart-6: 30 80% 50%;
+    --chart-7: 180 60% 45%;
+    --chart-8: 340 65% 50%;
+    --chart-9: 60 70% 50%;
+
+    --glow-primary: 0 0 18px hsl(216 89% 52% / 0.18);
+    --glow-card: 0 0 26px hsl(214 25% 86% / 0.55);
+    --glow-accent: 0 0 18px hsl(31 95% 52% / 0.16);
+  }
+
+  .dark {
     --background: 222 47% 11%;
     --foreground: 210 40% 98%;
 
@@ -34,8 +92,6 @@
     --input: 222 30% 20%;
     --ring: 217 91% 60%;
 
-    --radius: 0.75rem;
-
     --sidebar-background: 222 50% 9%;
     --sidebar-foreground: 215 20% 55%;
     --sidebar-primary: 217 91% 60%;
@@ -47,16 +103,6 @@
 
     --success: 152 60% 45%;
     --success-foreground: 210 40% 98%;
-
-    --chart-1: 217 91% 60%;
-    --chart-2: 38 92% 50%;
-    --chart-3: 152 60% 45%;
-    --chart-4: 280 60% 55%;
-    --chart-5: 0 72% 51%;
-    --chart-6: 30 80% 50%;
-    --chart-7: 180 60% 45%;
-    --chart-8: 340 65% 50%;
-    --chart-9: 60 70% 50%;
 
     --glow-primary: 0 0 20px hsl(217 91% 60% / 0.2);
     --glow-card: 0 0 30px hsl(222 30% 20% / 0.5);

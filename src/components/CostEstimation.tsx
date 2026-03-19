@@ -2,20 +2,9 @@ import { motion } from "framer-motion";
 import { ArrowRight, Download, CheckCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer } from "recharts";
-
-const costData = [
-  { category: "Foundation", unit: "cu m", qty: 320, unitCost: 4500, total: 1440000 },
-  { category: "Structure", unit: "sq ft", qty: 12000, unitCost: 850, total: 10200000 },
-  { category: "Roofing", unit: "sq ft", qty: 3200, unitCost: 350, total: 1120000 },
-  { category: "Electrical", unit: "points", qty: 180, unitCost: 2200, total: 396000 },
-  { category: "Plumbing", unit: "points", qty: 95, unitCost: 3100, total: 294500 },
-  { category: "Interior Finishing", unit: "sq ft", qty: 10000, unitCost: 600, total: 6000000 },
-  { category: "Labor", unit: "man-days", qty: 4500, unitCost: 800, total: 3600000 },
-  { category: "Equipment", unit: "days", qty: 120, unitCost: 5500, total: 660000 },
-  { category: "Contingency (10%)", unit: "—", qty: 1, unitCost: 2371050, total: 2371050 },
-];
-
-const grandTotal = costData.reduce((s, r) => s + r.total, 0);
+import { Slider } from "@/components/ui/slider";
+import { formatCurrencyINR, type CostRow, type ProjectDetails } from "@/lib/project-model";
+import { toast } from "@/components/ui/sonner";
 
 const COLORS = [
   "hsl(37,90%,55%)", "hsl(200,70%,50%)", "hsl(152,60%,45%)",
@@ -24,11 +13,41 @@ const COLORS = [
 ];
 
 interface CostEstimationProps {
+  project: ProjectDetails;
+  rows: CostRow[];
+  contingencyPct: number;
+  confidence: number;
+  onChangeContingency: (value: number) => void;
   onNext: () => void;
 }
 
-export function CostEstimation({ onNext }: CostEstimationProps) {
-  const fmt = (n: number) => "₹" + n.toLocaleString("en-IN");
+export function CostEstimation({
+  project,
+  rows,
+  contingencyPct,
+  confidence,
+  onChangeContingency,
+  onNext,
+}: CostEstimationProps) {
+  const grandTotal = rows.reduce((sum, row) => sum + row.total, 0);
+
+  const exportReport = () => {
+    const lines = [
+      ["Category", "Unit", "Quantity", "Unit Cost", "Total"].join(","),
+      ...rows.map((row) => [row.category, row.unit, row.qty, Math.round(row.unitCost), Math.round(row.total)].join(",")),
+      ["Grand Total", "", "", "", Math.round(grandTotal)].join(","),
+    ];
+
+    const blob = new Blob([lines.join("\n")], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `${project.name.toLowerCase().replace(/\s+/g, "-")}-cost-report.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+
+    toast.success("Cost report downloaded");
+  };
 
   return (
     <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.35 }}>
@@ -37,15 +56,32 @@ export function CostEstimation({ onNext }: CostEstimationProps) {
       {/* Summary */}
       <div className="rounded-lg border border-border bg-card p-5 mb-6 flex flex-wrap items-center justify-between gap-4">
         <div>
-          <p className="text-sm text-muted-foreground">Greenfield Residential Complex — Mumbai</p>
-          <p className="text-xs text-muted-foreground mt-0.5">Residential · 12,000 sq ft · Concrete</p>
+          <p className="text-sm text-muted-foreground">{project.name} — {project.location}</p>
+          <p className="text-xs text-muted-foreground mt-0.5">
+            {project.type[0].toUpperCase() + project.type.slice(1)} · {project.areaSqFt.toLocaleString("en-IN")} sq ft · {project.material}
+          </p>
         </div>
         <div className="text-right">
-          <p className="text-3xl font-heading font-bold text-primary">{fmt(grandTotal)}</p>
+          <p className="text-3xl font-heading font-bold text-primary">{formatCurrencyINR(grandTotal)}</p>
           <span className="inline-flex items-center gap-1 mt-1 text-xs font-medium px-2 py-0.5 rounded-full bg-success/15 text-success">
-            <CheckCircle size={12} /> 87% Confidence
+            <CheckCircle size={12} /> {confidence}% Confidence
           </span>
         </div>
+      </div>
+
+      <div className="rounded-lg border border-border bg-card p-4 mb-6">
+        <div className="flex items-center justify-between gap-4">
+          <p className="text-sm font-medium">Contingency Buffer: {contingencyPct}%</p>
+          <p className="text-xs text-muted-foreground">Adjust risk margin before finalizing resources.</p>
+        </div>
+        <Slider
+          className="mt-3"
+          value={[contingencyPct]}
+          onValueChange={(v) => onChangeContingency(v[0])}
+          min={5}
+          max={25}
+          step={1}
+        />
       </div>
 
       {/* Table + Chart */}
@@ -62,18 +98,18 @@ export function CostEstimation({ onNext }: CostEstimationProps) {
               </tr>
             </thead>
             <tbody>
-              {costData.map((row, i) => (
+              {rows.map((row, i) => (
                 <tr key={i} className="border-b border-border/50 hover:bg-secondary/40 transition">
                   <td className="px-4 py-2.5 font-medium">{row.category}</td>
                   <td className="px-4 py-2.5 text-muted-foreground">{row.unit}</td>
                   <td className="px-4 py-2.5 text-right">{row.qty.toLocaleString()}</td>
-                  <td className="px-4 py-2.5 text-right">{fmt(row.unitCost)}</td>
-                  <td className="px-4 py-2.5 text-right font-medium">{fmt(row.total)}</td>
+                  <td className="px-4 py-2.5 text-right">{formatCurrencyINR(row.unitCost)}</td>
+                  <td className="px-4 py-2.5 text-right font-medium">{formatCurrencyINR(row.total)}</td>
                 </tr>
               ))}
               <tr className="font-bold">
                 <td className="px-4 py-3" colSpan={4}>Grand Total</td>
-                <td className="px-4 py-3 text-right text-primary">{fmt(grandTotal)}</td>
+                <td className="px-4 py-3 text-right text-primary">{formatCurrencyINR(grandTotal)}</td>
               </tr>
             </tbody>
           </table>
@@ -84,7 +120,7 @@ export function CostEstimation({ onNext }: CostEstimationProps) {
           <ResponsiveContainer width="100%" height={220}>
             <PieChart>
               <Pie
-                data={costData}
+                data={rows}
                 dataKey="total"
                 nameKey="category"
                 cx="50%"
@@ -94,14 +130,14 @@ export function CostEstimation({ onNext }: CostEstimationProps) {
                 paddingAngle={2}
                 strokeWidth={0}
               >
-                {costData.map((_, i) => (
+                {rows.map((_, i) => (
                   <Cell key={i} fill={COLORS[i % COLORS.length]} />
                 ))}
               </Pie>
               <Tooltip
                 contentStyle={{ background: "hsl(215,35%,15%)", border: "1px solid hsl(215,30%,22%)", borderRadius: 8, fontSize: 12 }}
                 itemStyle={{ color: "hsl(210,40%,96%)" }}
-                formatter={(value: number) => fmt(value)}
+                formatter={(value: number) => formatCurrencyINR(value)}
               />
             </PieChart>
           </ResponsiveContainer>
@@ -109,7 +145,7 @@ export function CostEstimation({ onNext }: CostEstimationProps) {
       </div>
 
       <div className="flex flex-wrap gap-3">
-        <Button variant="outline" className="gap-2">
+        <Button variant="outline" className="gap-2" onClick={exportReport}>
           <Download size={16} /> Download Report
         </Button>
         <Button onClick={onNext} className="gap-2">

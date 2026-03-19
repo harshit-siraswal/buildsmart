@@ -1,40 +1,86 @@
 import { useState } from "react";
-import { MessageCircle, X, Send } from "lucide-react";
+import { MessageCircle, X, Send, Trash2 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-
-const suggestions = [
-  "What if I change material to steel?",
-  "Reduce budget by 20%",
-  "Add 2 more floors",
-];
+import { formatCurrencyINR, type ProjectDetails } from "@/lib/project-model";
+import type { Screen } from "@/components/AppSidebar";
 
 interface Message {
   role: "user" | "ai";
   text: string;
 }
 
-export function AIChatBubble() {
+interface AIChatBubbleProps {
+  project: ProjectDetails;
+  screen: Screen;
+  totalCost: number;
+  onApplyBudgetChange: (deltaPct: number) => void;
+}
+
+export function AIChatBubble({ project, screen, totalCost, onApplyBudgetChange }: AIChatBubbleProps) {
   const [open, setOpen] = useState(false);
   const [messages, setMessages] = useState<Message[]>([
-    { role: "ai", text: "Hi! I'm your BuildSmart AI assistant. Ask me anything about your project — costs, materials, timelines, and more." },
+    { role: "ai", text: "Hi! I am your BuildSmart AI assistant. Ask about cost, material, timeline, or try quick actions below." },
   ]);
   const [input, setInput] = useState("");
 
+  const suggestions = [
+    "How far are we from budget?",
+    "What if material changes to steel?",
+    "Apply 10% budget cut",
+  ];
+
+  const generateReply = (text: string) => {
+    const q = text.toLowerCase();
+    const budgetGap = totalCost - project.budget;
+    const overUnder = budgetGap > 0 ? "over" : "under";
+
+    if (q.includes("budget")) {
+      return `Current estimate is ${formatCurrencyINR(totalCost)}, which is ${formatCurrencyINR(Math.abs(budgetGap))} ${overUnder} your budget of ${formatCurrencyINR(project.budget)}.`;
+    }
+
+    if (q.includes("steel")) {
+      const steelEstimate = Math.round(totalCost * 1.08);
+      return `Switching to steel usually increases structural and labor cost. Expected estimate: ${formatCurrencyINR(steelEstimate)} (about +8%).`;
+    }
+
+    if (q.includes("timeline") || q.includes("duration")) {
+      const approxWeeks = Math.max(16, Math.round(project.areaSqFt / 800 + 8));
+      return `For ${project.areaSqFt.toLocaleString("en-IN")} sq ft, expected duration is around ${approxWeeks} weeks from ${project.startDate.toLocaleDateString("en-IN")}.`;
+    }
+
+    if (q.includes("apply 10% budget cut") || q.includes("reduce budget by 10")) {
+      onApplyBudgetChange(-10);
+      return "Applied a 10% budget cut to project settings. Re-open cost and timeline to compare impact.";
+    }
+
+    return `You are in the ${screen} stage for ${project.name}. Ask me to compare budget, materials, or timeline trade-offs.`;
+  };
+
   const send = (text: string) => {
     if (!text.trim()) return;
-    setMessages((m) => [...m, { role: "user", text }]);
+    const clean = text.trim();
+    setMessages((m) => [...m, { role: "user", text: clean }]);
     setInput("");
     setTimeout(() => {
       setMessages((m) => [
         ...m,
         {
           role: "ai",
-          text: "Great question! Based on the current project parameters, I'd estimate that change would adjust the overall cost by approximately 12-15%. Would you like me to run a detailed re-estimation?",
+          text: generateReply(clean),
         },
       ]);
-    }, 800);
+    }, 450);
+  };
+
+  const clearChat = () => {
+    setMessages([
+      {
+        role: "ai",
+        text: "Chat reset. Ask another question about your latest project state.",
+      },
+    ]);
   };
 
   return (
@@ -50,9 +96,14 @@ export function AIChatBubble() {
           >
             <div className="flex items-center justify-between px-4 py-3 border-b border-border">
               <span className="font-heading font-semibold text-sm">AI Assistant</span>
-              <button onClick={() => setOpen(false)} className="text-muted-foreground hover:text-foreground">
-                <X size={16} />
-              </button>
+              <div className="flex items-center gap-2">
+                <button onClick={clearChat} className="text-muted-foreground hover:text-foreground">
+                  <Trash2 size={14} />
+                </button>
+                <button onClick={() => setOpen(false)} className="text-muted-foreground hover:text-foreground">
+                  <X size={16} />
+                </button>
+              </div>
             </div>
 
             <div className="flex-1 overflow-y-auto p-4 space-y-3 text-sm">
