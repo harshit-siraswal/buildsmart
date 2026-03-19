@@ -1,33 +1,53 @@
 import { useState } from "react";
 import { AppSidebar, Screen } from "@/components/AppSidebar";
 import { TopBar } from "@/components/TopBar";
+import { ProjectList } from "@/components/ProjectList";
+import { ProjectView } from "@/components/ProjectView";
 import { InputProject } from "@/components/InputProject";
-import { CostEstimation } from "@/components/CostEstimation";
-import { ResourcePlanning } from "@/components/ResourcePlanning";
-import { TimelineGantt } from "@/components/TimelineGantt";
 import { AIChatBubble } from "@/components/AIChatBubble";
 
 const Index = () => {
   const [screen, setScreen] = useState<Screen>("input");
+  const [selectedProject, setSelectedProject] = useState<string | null>(null);
+  const [showNewProject, setShowNewProject] = useState(false);
+
+  const handleSelectProject = (id: string) => {
+    setSelectedProject(id);
+    setShowNewProject(false);
+  };
+
+  const handleNewProject = () => {
+    setSelectedProject(null);
+    setShowNewProject(true);
+  };
+
+  const handleBack = () => {
+    setSelectedProject(null);
+    setShowNewProject(false);
+  };
 
   const renderScreen = () => {
-    switch (screen) {
-      case "input":
-        return <InputProject onSubmit={() => setScreen("cost")} />;
-      case "cost":
-        return <CostEstimation onNext={() => setScreen("resource")} />;
-      case "resource":
-        return <ResourcePlanning onNext={() => setScreen("timeline")} />;
-      case "timeline":
-        return <TimelineGantt />;
+    if (screen === "input") {
+      if (selectedProject) {
+        return <ProjectView projectId={selectedProject} onBack={handleBack} />;
+      }
+      if (showNewProject) {
+        return <InputProject onSubmit={() => handleSelectProject("new")} />;
+      }
+      return <ProjectList onSelectProject={handleSelectProject} onNewProject={handleNewProject} />;
     }
+    // For other sidebar items, just show the project view with the right tab
+    if (selectedProject) {
+      return <ProjectView projectId={selectedProject} onBack={handleBack} />;
+    }
+    return <ProjectList onSelectProject={handleSelectProject} onNewProject={handleNewProject} />;
   };
 
   return (
     <div className="flex min-h-screen w-full">
-      <AppSidebar active={screen} onNavigate={setScreen} />
+      <AppSidebar active={screen} onNavigate={(s) => { setScreen(s); setSelectedProject(null); setShowNewProject(false); }} />
       <div className="flex-1 flex flex-col min-w-0">
-        <TopBar projectName="Greenfield Residential Complex — Mumbai" />
+        <TopBar projectName={selectedProject ? "Greenfield Residential Complex — Mumbai" : "BuildSmart AI — Dashboard"} />
         <main className="flex-1 overflow-y-auto p-6 lg:p-8">
           {renderScreen()}
         </main>

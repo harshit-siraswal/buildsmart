@@ -81,8 +81,9 @@ export default {
         sm: "calc(var(--radius) - 4px)",
       },
       boxShadow: {
-        glow: "var(--glow-amber)",
+        glow: "var(--glow-primary)",
         "glow-card": "var(--glow-card)",
+        "glow-accent": "var(--glow-accent)",
       },
       keyframes: {
         "accordion-down": { from: { height: "0" }, to: { height: "var(--radix-accordion-content-height)" } },
