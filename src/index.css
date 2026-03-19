@@ -1,0 +1,76 @@
+@import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 216 40% 12%;
+    --foreground: 210 40% 96%;
+
+    --card: 215 35% 15%;
+    --card-foreground: 210 40% 96%;
+
+    --popover: 215 35% 15%;
+    --popover-foreground: 210 40% 96%;
+
+    --primary: 37 90% 55%;
+    --primary-foreground: 216 40% 8%;
+
+    --secondary: 215 30% 20%;
+    --secondary-foreground: 210 40% 90%;
+
+    --muted: 215 25% 18%;
+    --muted-foreground: 215 15% 55%;
+
+    --accent: 37 90% 55%;
+    --accent-foreground: 216 40% 8%;
+
+    --destructive: 0 72% 51%;
+    --destructive-foreground: 210 40% 98%;
+
+    --border: 215 30% 22%;
+    --input: 215 30% 22%;
+    --ring: 37 90% 55%;
+
+    --radius: 0.625rem;
+
+    --sidebar-background: 216 42% 10%;
+    --sidebar-foreground: 215 15% 55%;
+    --sidebar-primary: 37 90% 55%;
+    --sidebar-primary-foreground: 216 40% 8%;
+    --sidebar-accent: 215 30% 16%;
+    --sidebar-accent-foreground: 210 40% 96%;
+    --sidebar-border: 215 30% 18%;
+    --sidebar-ring: 37 90% 55%;
+
+    --success: 152 60% 45%;
+    --success-foreground: 210 40% 98%;
+
+    --chart-1: 37 90% 55%;
+    --chart-2: 200 70% 50%;
+    --chart-3: 152 60% 45%;
+    --chart-4: 280 60% 55%;
+    --chart-5: 0 72% 51%;
+    --chart-6: 30 80% 50%;
+    --chart-7: 180 60% 45%;
+    --chart-8: 340 65% 50%;
+    --chart-9: 60 70% 50%;
+
+    --glow-amber: 0 0 20px hsl(37 90% 55% / 0.15);
+    --glow-card: 0 0 30px hsl(215 30% 22% / 0.5);
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground font-body antialiased;
+  }
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-heading;
+  }
+}
