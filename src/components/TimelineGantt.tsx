@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { Download, Diamond } from "lucide-react";
+import { ArrowLeft, Download, Diamond, RotateCcw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useMemo, useState } from "react";
 import { format } from "date-fns";
@@ -12,9 +12,11 @@ interface TimelineGanttProps {
   project: ProjectDetails;
   phases: TimelinePhase[];
   totalWeeks: number;
+  onBack: () => void;
+  onRestart: () => void;
 }
 
-export function TimelineGantt({ project, phases, totalWeeks }: TimelineGanttProps) {
+export function TimelineGantt({ project, phases, totalWeeks, onBack, onRestart }: TimelineGanttProps) {
   const [criticalOnly, setCriticalOnly] = useState(false);
   const visiblePhases = useMemo(
     () => (criticalOnly ? phases.filter((phase) => phase.critical) : phases),
@@ -141,6 +143,15 @@ export function TimelineGantt({ project, phases, totalWeeks }: TimelineGanttProp
         <span>
           Budget guardrail: {formatCurrencyINR(project.budget)}
         </span>
+      </div>
+
+      <div className="mt-5 flex flex-wrap gap-2">
+        <Button variant="outline" className="gap-2" onClick={onBack}>
+          <ArrowLeft size={16} /> Back to Resources
+        </Button>
+        <Button variant="outline" className="gap-2" onClick={onRestart}>
+          <RotateCcw size={16} /> Start New Plan
+        </Button>
       </div>
     </motion.div>
   );

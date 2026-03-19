@@ -1,4 +1,5 @@
 import { motion } from "framer-motion";
+import { useReducedMotion } from "framer-motion";
 import { ArrowRight, BarChart3, Brain, Clock, DollarSign, Layers, Shield, Users, Zap } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
@@ -23,6 +24,7 @@ const stats = [
 
 export default function LandingPage() {
   const navigate = useNavigate();
+  const reduceMotion = useReducedMotion();
 
   return (
     <div className="min-h-screen bg-background">
@@ -51,6 +53,52 @@ export default function LandingPage() {
       <section className="relative pt-32 pb-20 px-6 overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-b from-primary/5 via-transparent to-transparent" />
         <div className="absolute top-20 left-1/2 -translate-x-1/2 w-[800px] h-[800px] rounded-full bg-primary/5 blur-3xl" />
+        <motion.svg
+          viewBox="0 0 1200 460"
+          className="absolute -top-8 left-1/2 -translate-x-1/2 w-[1400px] max-w-none pointer-events-none opacity-45"
+          initial={{ opacity: 0, y: -24 }}
+          animate={{ opacity: 0.45, y: 0 }}
+          transition={{ duration: 0.8, ease: "easeOut" }}
+          aria-hidden="true"
+        >
+          <motion.path
+            d="M0 180 C 120 90, 240 290, 360 180 S 600 70, 720 180 S 960 280, 1200 180"
+            fill="none"
+            stroke="hsl(var(--primary))"
+            strokeOpacity="0.4"
+            strokeWidth="2"
+            animate={reduceMotion ? undefined : { pathLength: [0.2, 1, 0.2], opacity: [0.25, 0.45, 0.25] }}
+            transition={{ duration: 12, repeat: Infinity, ease: "easeInOut" }}
+          />
+          <motion.path
+            d="M0 250 C 150 150, 300 350, 450 250 S 750 130, 900 250 S 1050 330, 1200 250"
+            fill="none"
+            stroke="hsl(var(--accent))"
+            strokeOpacity="0.35"
+            strokeWidth="2"
+            strokeDasharray="8 10"
+            animate={reduceMotion ? undefined : { strokeDashoffset: [0, -120] }}
+            transition={{ duration: 10, repeat: Infinity, ease: "linear" }}
+          />
+          <motion.circle
+            cx="240"
+            cy="120"
+            r="18"
+            fill="hsl(var(--primary))"
+            fillOpacity="0.18"
+            animate={reduceMotion ? undefined : { cy: [120, 132, 120], r: [18, 22, 18] }}
+            transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
+          />
+          <motion.circle
+            cx="900"
+            cy="300"
+            r="24"
+            fill="hsl(var(--accent))"
+            fillOpacity="0.14"
+            animate={reduceMotion ? undefined : { cy: [300, 286, 300], r: [24, 28, 24] }}
+            transition={{ duration: 7, repeat: Infinity, ease: "easeInOut" }}
+          />
+        </motion.svg>
         
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -80,7 +128,7 @@ export default function LandingPage() {
             <Button size="lg" onClick={() => navigate("/dashboard")} className="text-base px-8 gap-2 shadow-glow">
               Start Building <ArrowRight size={18} />
             </Button>
-            <Button size="lg" variant="outline" className="text-base px-8">
+            <Button size="lg" variant="outline" className="text-base px-8" onClick={() => navigate("/dashboard")}>
               View demo
             </Button>
           </div>
@@ -95,6 +143,19 @@ export default function LandingPage() {
         >
           <div className="rounded-xl border border-border bg-card p-1.5 shadow-2xl shadow-primary/5">
             <div className="rounded-lg bg-secondary/50 border border-border overflow-hidden">
+              <div className="relative h-2 overflow-hidden">
+                <motion.svg viewBox="0 0 900 16" className="absolute inset-0 w-full h-full" aria-hidden="true">
+                  <motion.path
+                    d="M0 8 H900"
+                    stroke="hsl(var(--primary))"
+                    strokeOpacity="0.5"
+                    strokeWidth="2"
+                    strokeDasharray="10 8"
+                    animate={reduceMotion ? undefined : { strokeDashoffset: [0, -120] }}
+                    transition={{ duration: 8, repeat: Infinity, ease: "linear" }}
+                  />
+                </motion.svg>
+              </div>
               <div className="flex items-center gap-2 px-4 py-2.5 border-b border-border/50">
                 <div className="flex gap-1.5">
                   <div className="w-3 h-3 rounded-full bg-destructive/60" />

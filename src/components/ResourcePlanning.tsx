@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { ArrowRight } from "lucide-react";
+import { ArrowLeft, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
 import { Switch } from "@/components/ui/switch";
@@ -14,6 +14,7 @@ interface ResourcePlanningProps {
   accelerated: boolean;
   onChangeCrewMultiplier: (value: number) => void;
   onChangeAccelerated: (value: boolean) => void;
+  onBack: () => void;
   onNext: () => void;
 }
 
@@ -24,6 +25,7 @@ export function ResourcePlanning({
   accelerated,
   onChangeCrewMultiplier,
   onChangeAccelerated,
+  onBack,
   onNext,
 }: ResourcePlanningProps) {
   return (
@@ -134,9 +136,14 @@ export function ResourcePlanning({
           <p className="text-sm text-muted-foreground">Total Resource Cost for {project.name}</p>
           <p className="text-2xl font-heading font-bold text-primary">{formatCurrencyINR(plan.totalCost)}</p>
         </div>
-        <Button onClick={onNext} className="gap-2">
-          View Timeline <ArrowRight size={16} />
-        </Button>
+        <div className="flex gap-2">
+          <Button variant="outline" onClick={onBack} className="gap-2">
+            <ArrowLeft size={16} /> Back to Cost
+          </Button>
+          <Button onClick={onNext} className="gap-2">
+            View Timeline <ArrowRight size={16} />
+          </Button>
+        </div>
       </div>
     </motion.div>
   );

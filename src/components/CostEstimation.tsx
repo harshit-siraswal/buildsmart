@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { ArrowRight, Download, CheckCircle } from "lucide-react";
+import { ArrowLeft, ArrowRight, Download, CheckCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer } from "recharts";
 import { Slider } from "@/components/ui/slider";
@@ -18,6 +18,7 @@ interface CostEstimationProps {
   contingencyPct: number;
   confidence: number;
   onChangeContingency: (value: number) => void;
+  onBack: () => void;
   onNext: () => void;
 }
 
@@ -27,6 +28,7 @@ export function CostEstimation({
   contingencyPct,
   confidence,
   onChangeContingency,
+  onBack,
   onNext,
 }: CostEstimationProps) {
   const grandTotal = rows.reduce((sum, row) => sum + row.total, 0);
@@ -145,6 +147,9 @@ export function CostEstimation({
       </div>
 
       <div className="flex flex-wrap gap-3">
+        <Button variant="outline" className="gap-2" onClick={onBack}>
+          <ArrowLeft size={16} /> Back to Details
+        </Button>
         <Button variant="outline" className="gap-2" onClick={exportReport}>
           <Download size={16} /> Download Report
         </Button>

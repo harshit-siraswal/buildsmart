@@ -204,6 +204,7 @@ const Index = () => {
             contingencyPct={contingencyPct}
             confidence={confidence}
             onChangeContingency={setContingencyPct}
+            onBack={() => setScreen("input")}
             onNext={() => moveForward("resource")}
           />
         );
@@ -216,11 +217,20 @@ const Index = () => {
             accelerated={accelerated}
             onChangeCrewMultiplier={setCrewMultiplier}
             onChangeAccelerated={setAccelerated}
+            onBack={() => setScreen("cost")}
             onNext={() => moveForward("timeline")}
           />
         );
       case "timeline":
-        return <TimelineGantt project={project} phases={timeline.phases} totalWeeks={timeline.totalWeeks} />;
+        return (
+          <TimelineGantt
+            project={project}
+            phases={timeline.phases}
+            totalWeeks={timeline.totalWeeks}
+            onBack={() => setScreen("resource")}
+            onRestart={resetWorkflow}
+          />
+        );
     }
 
     return null;

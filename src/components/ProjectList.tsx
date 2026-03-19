@@ -1,6 +1,8 @@
 import { motion } from "framer-motion";
 import { Plus, MapPin, Calendar, ArrowRight, Building2, Factory, Landmark, HardHat } from "lucide-react";
+import { useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 
 export interface ProjectSummary {
   id: string;
@@ -63,12 +65,29 @@ interface ProjectListProps {
 }
 
 export function ProjectList({ onSelectProject, onNewProject }: ProjectListProps) {
+  const [search, setSearch] = useState("");
+  const [statusFilter, setStatusFilter] = useState<"all" | ProjectSummary["status"]>("all");
   const fmt = (n: number) => "₹" + n.toLocaleString("en-IN");
   const statusColors: Record<string, string> = {
     estimated: "bg-accent/15 text-accent",
     "in-progress": "bg-primary/15 text-primary",
     completed: "bg-success/15 text-success",
   };
+
+  const filteredProjects = useMemo(() => {
+    const q = search.trim().toLowerCase();
+
+    return demoProjects.filter((project) => {
+      const matchesStatus = statusFilter === "all" ? true : project.status === statusFilter;
+      const matchesSearch =
+        !q ||
+        project.name.toLowerCase().includes(q) ||
+        project.location.toLowerCase().includes(q) ||
+        project.type.toLowerCase().includes(q);
+
+      return matchesStatus && matchesSearch;
+    });
+  }, [search, statusFilter]);
 
   return (
     <motion.div
@@ -80,7 +99,7 @@ export function ProjectList({ onSelectProject, onNewProject }: ProjectListProps)
         <div>
           <h1 className="text-2xl font-heading font-bold">Projects</h1>
           <p className="text-sm text-muted-foreground mt-1">
-            {demoProjects.length} projects · Select one to view AI estimates
+            {filteredProjects.length} of {demoProjects.length} projects · Select one to view AI estimates
           </p>
         </div>
         <Button onClick={onNewProject} className="gap-2">
@@ -88,8 +107,38 @@ export function ProjectList({ onSelectProject, onNewProject }: ProjectListProps)
         </Button>
       </div>
 
+      <div className="rounded-xl border border-border bg-card p-4 mb-5 space-y-3">
+        <Input
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          placeholder="Search by project, city, or type"
+          className="bg-secondary border-border"
+        />
+        <div className="flex flex-wrap gap-2">
+          {[
+            { id: "all", label: "All" },
+            { id: "estimated", label: "Estimated" },
+            { id: "in-progress", label: "In Progress" },
+            { id: "completed", label: "Completed" },
+          ].map((item) => (
+            <button
+              key={item.id}
+              type="button"
+              onClick={() => setStatusFilter(item.id as "all" | ProjectSummary["status"])}
+              className={`text-xs px-3 py-1.5 rounded-full border transition ${
+                statusFilter === item.id
+                  ? "border-primary bg-primary/10 text-primary"
+                  : "border-border text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              {item.label}
+            </button>
+          ))}
+        </div>
+      </div>
+
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-        {demoProjects.map((project, i) => {
+        {filteredProjects.map((project, i) => {
           const Icon = typeIcons[project.type] || Building2;
           return (
             <motion.button
@@ -132,6 +181,12 @@ export function ProjectList({ onSelectProject, onNewProject }: ProjectListProps)
             </motion.button>
           );
         })}
+
+        {filteredProjects.length === 0 && (
+          <div className="col-span-full rounded-xl border border-dashed border-border p-8 text-center text-sm text-muted-foreground">
+            No projects match your current search/filter.
+          </div>
+        )}
 
         {/* Add new project card */}
         <motion.button
